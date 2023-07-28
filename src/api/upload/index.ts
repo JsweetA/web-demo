@@ -2,7 +2,7 @@ import Fly from 'flyio/dist/npm/fly';
 
 const fly = new Fly();
 
-export default function request (url, data) {
+export default function request(url: string, data: Blob) {
   return fly
     .request(url, data, {
       method: 'PUT',
@@ -11,10 +11,10 @@ export default function request (url, data) {
         accept: '*/*',
       },
     })
-    .then((d) => {
+    .then((d: any) => {
       console.log('request result:', d);
     })
-    .catch((e) => {
+    .catch((e: any) => {
       console.log('error', e);
     });
-};
+}
