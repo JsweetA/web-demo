@@ -8,6 +8,7 @@ export namespace API {
 
 	export type ReqType = {
 		url: string;
+		baseUrl?: string;
 		// query参数或者body参数
 		data?: object;
 		method?: Methods;
@@ -38,4 +39,10 @@ export namespace API {
 		body?: any;
 		[value: string]: any;
 	};
+}
+
+export namespace REQUEST {
+	// 大于600 的全是token问题
+	export const TOKEN_ERROR = 600;
+	export const NORMAL = 200;
 }

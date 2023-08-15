@@ -1,8 +1,9 @@
 import Fly from "flyio/dist/npm/fly";
 import { Notification } from "@arco-design/web-vue";
 import { getBaseUrl } from "../apiConfig";
-import { API } from "@/types/index";
-import { getToken } from "@/utils/auth";
+import { API, REQUEST } from "@/types/index";
+import { getToken, removeToken } from "@/utils/auth";
+// import router from "@/router";
 
 const fly = new Fly();
 
@@ -15,8 +16,8 @@ export const request = <T>(req: API.ReqType): T => {
 		describe = "",
 		errorInfo = "",
 		callback,
+		baseUrl = getBaseUrl(),
 	} = req;
-	const baseUrl = getBaseUrl();
 	const token = getToken();
 	return new Promise((resolve, reject) => {
 		fly
@@ -31,20 +32,23 @@ export const request = <T>(req: API.ReqType): T => {
 				},
 			})
 			.then((res: any) => {
-				const data: API.ResType = res?.data ? res?.data : res;
-				if (data?.code !== 200) {
-					Notification.error(errorInfo || data.msg);
-					reject({ message: data.msg });
-				} else {
-					describe.length && Notification.info(describe);
-					resolve(data?.data as T);
-				}
+				const data = (res?.data ? res?.data : res) as API.ResType;
+				data?.code !== REQUEST.NORMAL
+					? reject({ message: data.msg, ...data })
+					: (describe.length && Notification.info(describe), resolve(data?.data as T));
 			})
 			.catch((e: any) => {
-				if (callback) callback(e);
-				reject(e);
-				Notification.error(errorInfo || e?.msg || "请求失败");
+				callback && callback(e);
+				reject({ ...e.response.data, ...e });
 			});
+	}).catch((res) => {
+		Notification.error(errorInfo || res?.msg || "请求失败");
+		res?.code > REQUEST.TOKEN_ERROR &&
+			setTimeout(() => {
+				// 跳转到login
+			}, 2000);
+		// 抛出错误，阻止后续事件
+		throw new Error(JSON.stringify(res));
 	}) as T;
 };
 
