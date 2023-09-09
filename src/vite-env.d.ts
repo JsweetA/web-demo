@@ -9,3 +9,5 @@ interface ImportMetaEnv {
 }
 
 declare module "nprogress";
+declare module "flyio/dist/npm/fly";
+declare module "mitt";
